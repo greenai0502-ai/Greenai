@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Background circle -->
+  <circle cx="50" cy="50" r="48" fill="#2d7a3e"/>
+  
+  <!-- Mushroom cap -->
+  <ellipse cx="50" cy="45" rx="28" ry="18" fill="#4ade80"/>
+  <ellipse cx="50" cy="45" rx="22" ry="14" fill="#22c55e"/>
+  
+  <!-- Spots on mushroom -->
+  <circle cx="40" cy="42" r="3" fill="#86efac" opacity="0.8"/>
+  <circle cx="52" cy="40" r="4" fill="#86efac" opacity="0.8"/>
+  <circle cx="60" cy="44" r="2.5" fill="#86efac" opacity="0.8"/>
+  
+  <!-- Mushroom stem -->
+  <rect x="43" y="50" width="14" height="24" rx="3" fill="#f0fdf4"/>
+  
+  <!-- Leaf accent -->
+  <path d="M 70 65 Q 75 55, 72 48 Q 69 55, 70 65 Z" fill="#16a34a"/>
+  <path d="M 30 68 Q 25 60, 28 54 Q 31 60, 30 68 Z" fill="#16a34a"/>
+</svg>

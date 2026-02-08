@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Supabase Connection Test</title>
+</head>
+<body>
+    <h1>Supabase Connection Test</h1>
+    <button onclick="testConnection()">Test Connection</button>
+    <button onclick="testInsert()">Test Insert</button>
+    <pre id="output"></pre>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+        const SUPABASE_URL = 'https://zzgdtsofmffjnthpihrs.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp6Z2R0c29mbWZmam50aHBpaHJzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzMDUyNDIsImV4cCI6MjA4NTg4MTI0Mn0.f0BR4F0FiUieQ3IHj41Z3X0jEtO3TkE1wel84__0KPk';
+
+        const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+        const output = document.getElementById('output');
+
+        window.testConnection = async () => {
+            output.textContent = 'Testing connection...\n';
+            
+            try {
+                // Test 1: Basic fetch
+                output.textContent += '\n1. Testing basic HTTP connection...\n';
+                const response = await fetch(SUPABASE_URL);
+                output.textContent += `   Status: ${response.status}\n`;
+                
+                // Test 2: REST API endpoint
+                output.textContent += '\n2. Testing REST API...\n';
+                const restResponse = await fetch(`${SUPABASE_URL}/rest/v1/`, {
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`
+                    }
+                });
+                output.textContent += `   Status: ${restResponse.status}\n`;
+                
+                // Test 3: Query table
+                output.textContent += '\n3. Testing table query...\n';
+                const { data, error } = await supabase
+                    .from('identifications')
+                    .select('count', { count: 'exact', head: true });
+                
+                if (error) {
+                    output.textContent += `   ERROR: ${JSON.stringify(error, null, 2)}\n`;
+                } else {
+                    output.textContent += `   SUCCESS: Count = ${data}\n`;
+                }
+                
+            } catch (err) {
+                output.textContent += `\nERROR: ${err.message}\n`;
+                console.error(err);
+            }
+        };
+
+        window.testInsert = async () => {
+            output.textContent = 'Testing insert...\n';
+            
+            try {
+                const testData = {
+                    user_id: '1069c7b3-1b46-44f6-9fc2-ed14819acf19',
+                    species: 'Test Species',
+                    confidence: 0.95,
+                    identified_by: 'Test',
+                    found_in_database: false
+                };
+                
+                output.textContent += `\nInserting: ${JSON.stringify(testData, null, 2)}\n\n`;
+                
+                const { data, error } = await supabase
+                    .from('identifications')
+                    .insert([testData]);
+                
+                if (error) {
+                    output.textContent += `ERROR: ${JSON.stringify(error, null, 2)}\n`;
+                } else {
+                    output.textContent += `SUCCESS: ${JSON.stringify(data, null, 2)}\n`;
+                }
+                
+            } catch (err) {
+                output.textContent += `\nEXCEPTION: ${err.message}\n`;
+                console.error(err);
+            }
+        };
+    </script>
+</body>
+</html>
