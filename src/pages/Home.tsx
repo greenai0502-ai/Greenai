@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { Upload, Camera, Leaf, Sparkles } from 'lucide-react';
 import { Navbar } from '@/components/Navbar';
 import { CategorySection } from '@/components/CategorySection';
+import { SpeciesDistributionChart } from '@/components/SpeciesDistributionChart';
 import { getSpeciesByCategory } from '@/data/mockData';
 
 export default function Home() {
@@ -27,7 +28,7 @@ export default function Home() {
               <span className="text-gradient">World of Plants</span>
             </h1>
             <p className="text-lg text-muted-foreground mb-8">
-              Instantly identify plants, flowers & mushrooms using our advanced AI. 
+              Instantly identify plants, flowers & mushrooms using our advanced AI.
               Simply upload or capture a photo!
             </p>
 
@@ -61,6 +62,11 @@ export default function Home() {
         <CategorySection title="Plants" category="plants" species={plants} />
         <CategorySection title="Flowers" category="flowers" species={flowers} />
         <CategorySection title="Mushrooms" category="mushrooms" species={mushrooms} />
+
+        {/* Statistics */}
+        <div className="mt-12 mb-8">
+          <SpeciesDistributionChart />
+        </div>
       </div>
 
       {/* Footer */}
