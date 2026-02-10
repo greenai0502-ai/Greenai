@@ -74,10 +74,10 @@ export default function Home() {
         <div className="container mx-auto px-4 text-center">
           <div className="flex items-center justify-center gap-2 mb-2">
             <Leaf className="w-5 h-5 text-primary" />
-            <span className="font-display font-semibold text-foreground">GreenAI</span>
+            <span className="font-display font-semibold text-foreground">REPOT</span>
           </div>
           <p className="text-sm text-muted-foreground">
-            © 2026 GreenAI. All rights reserved.
+            © 2026 REPOT. All rights reserved.
           </p>
         </div>
       </footer>

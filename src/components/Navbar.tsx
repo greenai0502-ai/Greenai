@@ -46,7 +46,7 @@ export function Navbar() {
             <div className="w-10 h-10 rounded-xl nature-gradient flex items-center justify-center">
               <Leaf className="w-6 h-6 text-primary-foreground" />
             </div>
-            <span className="font-display text-xl font-bold text-foreground">GreenAI</span>
+            <span className="font-display text-xl font-bold text-foreground">REPOT</span>
           </Link>
 
           {/* Desktop Nav */}

@@ -1,6 +1,6 @@
 # Supabase Setup Guide
 
-This guide will help you set up Supabase for GreenAI authentication and database.
+This guide will help you set up Supabase for REPOT authentication and database.
 
 ## 1. Create a Supabase Project
 
@@ -8,7 +8,7 @@ This guide will help you set up Supabase for GreenAI authentication and database
 2. Sign up or log in
 3. Click "New Project"
 4. Fill in:
-   - **Project name**: `greenai` (or your preferred name)
+   - **Project name**: `REPOT` (or your preferred name)
    - **Database password**: Create a strong password (save it securely)
    - **Region**: Choose closest to your users
 5. Click "Create new project" (this takes ~2 minutes)

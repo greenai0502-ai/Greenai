@@ -27,7 +27,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   },
   global: {
     headers: {
-      'x-client-info': 'greenai-app'
+      'x-client-info': 'REPOT-app'
     }
   }
 });

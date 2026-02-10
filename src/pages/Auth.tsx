@@ -87,7 +87,7 @@ export default function Auth() {
         <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl nature-gradient mb-4 animate-float">
           <Leaf className="w-10 h-10 text-primary-foreground" />
         </div>
-        <h1 className="font-display text-4xl font-bold text-foreground mb-2">GreenAI</h1>
+        <h1 className="font-display text-4xl font-bold text-foreground mb-2">REPOT</h1>
         <p className="text-muted-foreground">AI-powered Plant Recognition</p>
       </div>
 

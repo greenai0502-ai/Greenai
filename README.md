@@ -1,4 +1,4 @@
-# GreenAI - Nature's ID
+# REPOT - Nature's ID
 
 AI-powered mushroom and plant species identification application using BioCLIP and Nvidia Nemotron VLM models.
 
@@ -48,7 +48,7 @@ The backend API must be running for species recognition to work.
 
 ```sh
 # Navigate to backend directory
-cd ../greenai
+cd ../REPOT
 
 # Install Python dependencies
 pip install -r requirements.txt
@@ -82,7 +82,7 @@ The API will run on `http://localhost:7860` by default.
 ## Project Structure
 
 ```
-frontend/greenai-nature-s-id-main/
+frontend/REPOT-nature-s-id-main/
 ├── src/
 │   ├── components/     # Reusable UI components
 │   ├── pages/          # Page components
@@ -92,7 +92,7 @@ frontend/greenai-nature-s-id-main/
 ├── public/             # Static assets
 └── .env                # Environment variables
 
-greenai/
+REPOT/
 ├── api.py              # FastAPI backend
 ├── data/               # Species database
 └── requirements.txt    # Python dependencies
