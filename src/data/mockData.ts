@@ -1,6 +1,5 @@
 export interface Species {
   id: string;
-  name: string;
   scientificName: string;
   location: string;
   description: string;
@@ -12,7 +11,6 @@ export const mockSpecies: Species[] = [
   // Plants (Updated from MCC Campus Survey)
   {
     id: 'p1',
-    name: "Devil's Tree",
     scientificName: 'Alstonia scholaris',
     location: 'Anderson Hall',
     description: 'A tropical evergreen tree with distinct whorled leaves and scented flowers. Known locally as Ezhilam Pala.',
@@ -21,7 +19,6 @@ export const mockSpecies: Species[] = [
   },
   {
     id: 'p2',
-    name: 'Orange Jasmine',
     scientificName: 'Murraya paniculata',
     location: 'MMIP',
     description: 'A small tropical evergreen shrub with white, fragrant flowers. Often used as an ornamental hedge.',
@@ -30,7 +27,6 @@ export const mockSpecies: Species[] = [
   },
   {
     id: 'p3',
-    name: 'Screw Pine',
     scientificName: 'Pandanus baptistii',
     location: 'Canteen',
     description: 'Known for its spiral arrangement of leaves and prop roots. A decorative variety of Pandanus.',
@@ -39,7 +35,6 @@ export const mockSpecies: Species[] = [
   },
   {
     id: 'p4',
-    name: 'Otaheite Gooseberry',
     scientificName: 'Phyllanthus acidus',
     location: 'QSC',
     description: 'Small tree bearing sour, edible yellow fruits. The fruits are used in pickles and jams.',
@@ -48,7 +43,6 @@ export const mockSpecies: Species[] = [
   },
   {
     id: 'p5',
-    name: 'False Ashoka',
     scientificName: 'Polyalthia longifolia',
     location: 'Botany Tank',
     description: 'Tall, lofty evergreen tree native to India. Common in avenue planting due to its effective noise pollution control.',
@@ -57,7 +51,6 @@ export const mockSpecies: Species[] = [
   },
   {
     id: 'p6',
-    name: 'Wild Coffee',
     scientificName: 'Psychotria nervosa',
     location: 'QSC',
     description: 'Shrub native to Florida but found in tropical regions. Known for its "coffee bean" like red fruits which attract birds.',
@@ -66,7 +59,6 @@ export const mockSpecies: Species[] = [
   },
   {
     id: 'p7',
-    name: 'Cardboard Palm',
     scientificName: 'Zamia furfuracea',
     location: 'QSC',
     description: 'Cycad with thick, leathery leaves that resemble cardboard. Not a true palm but an ancient plant lineage.',
@@ -76,7 +68,6 @@ export const mockSpecies: Species[] = [
   // Flowers
   {
     id: 'f1',
-    name: 'Rose',
     scientificName: 'Rosa indica',
     location: 'College Garden',
     description: 'Classic flowering plant symbolizing love and beauty. Available in various colors and fragrances.',
@@ -85,7 +76,6 @@ export const mockSpecies: Species[] = [
   },
   {
     id: 'f2',
-    name: 'Lotus',
     scientificName: 'Nelumbo nucifera',
     location: 'Campus Pond',
     description: 'Aquatic perennial plant considered sacred in many cultures. Known for its beautiful blooms rising from muddy waters.',
@@ -94,7 +84,6 @@ export const mockSpecies: Species[] = [
   },
   {
     id: 'f3',
-    name: 'Marigold',
     scientificName: 'Tagetes erecta',
     location: 'Main Gate',
     description: 'Bright orange and yellow flowers used in festivals and ceremonies. Known for natural pest-repelling properties.',
@@ -103,7 +92,6 @@ export const mockSpecies: Species[] = [
   },
   {
     id: 'f4',
-    name: 'Hibiscus',
     scientificName: 'Hibiscus rosa-sinensis',
     location: 'Science Block',
     description: 'Tropical flowering plant with large, colorful blooms. Often used in hair care and traditional medicine.',
@@ -113,7 +101,6 @@ export const mockSpecies: Species[] = [
   // Mushrooms
   {
     id: 'm1',
-    name: 'Button Mushroom',
     scientificName: 'Agaricus bisporus',
     location: 'MCC IOB Road',
     description: 'Most commonly cultivated edible mushroom worldwide. White to light brown cap with mild flavor.',
@@ -122,7 +109,6 @@ export const mockSpecies: Species[] = [
   },
   {
     id: 'm2',
-    name: 'Oyster Mushroom',
     scientificName: 'Pleurotus ostreatus',
     location: 'Forest Trail',
     description: 'Fan-shaped edible mushroom that grows on decaying wood. Popular in Asian cuisines.',
@@ -131,7 +117,6 @@ export const mockSpecies: Species[] = [
   },
   {
     id: 'm3',
-    name: 'Shiitake',
     scientificName: 'Lentinula edodes',
     location: 'Biology Lab',
     description: 'East Asian mushroom prized for its rich, savory taste. Used in medicine and cooking for centuries.',
@@ -140,7 +125,6 @@ export const mockSpecies: Species[] = [
   },
   {
     id: 'm4',
-    name: 'Chanterelle',
     scientificName: 'Cantharellus cibarius',
     location: 'Western Woods',
     description: 'Golden-colored wild mushroom with fruity aroma. Highly valued in gourmet cooking.',

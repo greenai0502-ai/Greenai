@@ -15,17 +15,14 @@ export function SpeciesCard({ species }: SpeciesCardProps) {
       <div className="aspect-[4/3] overflow-hidden">
         <img
           src={species.image}
-          alt={species.name}
+          alt={species.scientificName}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
         />
       </div>
       <div className="p-4">
-        <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">
-          {species.name}
-        </h3>
-        <p className="text-xs text-muted-foreground italic mb-2">
+        <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors italic">
           {species.scientificName}
-        </p>
+        </h3>
         <div className="flex items-center gap-1 text-sm text-muted-foreground">
           <MapPin className="w-3.5 h-3.5" />
           <span>{species.location}</span>

@@ -55,7 +55,7 @@ export default function SpeciesDetail() {
         <div className="relative rounded-2xl overflow-hidden mb-6 card-shadow animate-scale-in">
           <img
             src={species.image}
-            alt={species.name}
+            alt={species.scientificName}
             className="w-full aspect-[16/10] object-cover"
           />
           <div className="absolute top-4 left-4">
@@ -68,12 +68,10 @@ export default function SpeciesDetail() {
 
         {/* Content */}
         <div className="animate-fade-in" style={{ animationDelay: '150ms' }}>
-          <h1 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-2">
-            {species.name}
-          </h1>
-          <p className="text-lg text-muted-foreground italic mb-4">
+          <h1 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-2 italic">
             {species.scientificName}
-          </p>
+          </h1>
+          {/* Removed name field */}
 
           <div className="flex items-center gap-2 text-muted-foreground mb-6">
             <MapPin className="w-5 h-5" />
