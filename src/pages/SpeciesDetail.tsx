@@ -90,12 +90,15 @@ export default function SpeciesDetail() {
           <Button
             className="w-full h-14 rounded-xl nature-gradient text-primary-foreground font-semibold text-lg"
             onClick={() => {
-              // In production, this would open a map with the location
-              alert(`Map view for: ${species.location}`);
+              if (species.latitude && species.longitude) {
+                window.open(`https://www.google.com/maps?q=${species.latitude},${species.longitude}`, '_blank');
+              } else {
+                window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(species.location + " MCC Tambaram")}`, '_blank');
+              }
             }}
           >
             <Map className="w-5 h-5 mr-2" />
-            View on Map
+            View on Map (MCC Campus)
           </Button>
         </div>
       </div>
