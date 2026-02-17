@@ -20,19 +20,26 @@ export function SpeciesDistributionChart() {
           return;
         }
 
+        console.log('Fetched species data:', speciesData); // DEBUG LOG
+
         if (speciesData) {
           // Count species by location
           const locationCounts: Record<string, number> = {};
 
           speciesData.forEach((species) => {
-            const location = species.location || 'Unknown';
+            let location = species.location || 'Unknown';
+            location = location.trim(); // Normalize
             locationCounts[location] = (locationCounts[location] || 0) + 1;
           });
+
+          console.log('Processed location counts:', locationCounts); // DEBUG LOG
 
           // Convert to array format for Recharts
           const chartData = Object.entries(locationCounts)
             .map(([name, count]) => ({ name, count }))
             .sort((a, b) => b.count - a.count);
+
+          console.log('Final Chart Data:', chartData); // DEBUG LOG
 
           setData(chartData);
         }
