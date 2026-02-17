@@ -1,23 +1,49 @@
-
-import { useMemo } from 'react';
+import { useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabase';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { MapPin, TrendingUp } from 'lucide-react';
-import { mockSpecies } from '@/data/mockData';
+
 
 export function SpeciesDistributionChart() {
-  const data = useMemo(() => {
-    // Count species by location
-    const locationCounts: Record<string, number> = {};
-    
-    mockSpecies.forEach((species) => {
-      const location = species.location;
-      locationCounts[location] = (locationCounts[location] || 0) + 1;
-    });
+  const [data, setData] = useState<{ name: string; count: number }[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-    // Convert to array format for Recharts
-    return Object.entries(locationCounts)
-      .map(([name, count]) => ({ name, count }))
-      .sort((a, b) => b.count - a.count); // Sort by count descending
+  useEffect(() => {
+    async function fetchSpeciesData() {
+      try {
+        const { data: speciesData, error } = await supabase
+          .from('species')
+          .select('location');
+
+        if (error) {
+          console.error('Error fetching species data:', error);
+          return;
+        }
+
+        if (speciesData) {
+          // Count species by location
+          const locationCounts: Record<string, number> = {};
+
+          speciesData.forEach((species) => {
+            const location = species.location || 'Unknown';
+            locationCounts[location] = (locationCounts[location] || 0) + 1;
+          });
+
+          // Convert to array format for Recharts
+          const chartData = Object.entries(locationCounts)
+            .map(([name, count]) => ({ name, count }))
+            .sort((a, b) => b.count - a.count);
+
+          setData(chartData);
+        }
+      } catch (err) {
+        console.error('Unexpected error fetching chart data:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchSpeciesData();
   }, []);
 
   const COLORS = ['#10B981', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#6366F1', '#14B8A6'];
@@ -38,7 +64,7 @@ export function SpeciesDistributionChart() {
           <MapPin className="w-4 h-4" />
           <span>Number of discovered species per location</span>
         </div>
-        
+
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={data}
@@ -50,25 +76,25 @@ export function SpeciesDistributionChart() {
             }}
           >
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
-            <XAxis 
-              dataKey="name" 
-              angle={-45} 
-              textAnchor="end" 
-              interval={0} 
-              height={80} 
+            <XAxis
+              dataKey="name"
+              angle={-45}
+              textAnchor="end"
+              interval={0}
+              height={80}
               tick={{ fontSize: 12, fill: '#6B7280' }}
               stroke="#D1D5DB"
             />
-            <YAxis 
+            <YAxis
               allowDecimals={false}
               tick={{ fontSize: 12, fill: '#6B7280' }}
               stroke="#D1D5DB"
             />
-            <Tooltip 
+            <Tooltip
               cursor={{ fill: 'rgba(0, 0, 0, 0.05)' }}
-              contentStyle={{ 
-                backgroundColor: 'rgba(255, 255, 255, 0.95)', 
-                borderRadius: '8px', 
+              contentStyle={{
+                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                borderRadius: '8px',
                 border: '1px solid #E5E7EB',
                 boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
               }}
