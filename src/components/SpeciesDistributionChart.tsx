@@ -30,7 +30,7 @@ export function SpeciesDistributionChart() {
         console.log('[Chart Debug] Starting fetch with 5s timeout...');
 
         const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Request timed out (5000ms)')), 5000)
+          setTimeout(() => reject(new Error('Request timed out (15000ms) - Database might be paused or slow')), 15000)
         );
 
         const fetchPromise = supabase
@@ -115,6 +115,18 @@ export function SpeciesDistributionChart() {
               <li>Check RLS Policies: `CREATE POLICY "Public Read" ON identifications FOR SELECT USING (true);`</li>
             </ul>
           </div>
+          <div className="mt-4 p-4 bg-gray-100 rounded text-xs text-left overflow-auto max-w-md">
+            <code>
+              Run in Supabase SQL Editor:<br />
+              CREATE POLICY "Public Read Access" ON public.identifications FOR SELECT USING (true);
+            </code>
+          </div>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+          >
+            Retry Connection
+          </button>
         </div>
       </section>
     );
