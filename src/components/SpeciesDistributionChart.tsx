@@ -8,47 +8,68 @@ export function SpeciesDistributionChart() {
   const [data, setData] = useState<{ name: string; count: number }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
   useEffect(() => {
     let isMounted = true;
     console.log('[Chart Debug] Component mounted, starting fetch from "identifications"...');
 
+    // Check config immediately
+    const hasUrl = !!import.meta.env.VITE_SUPABASE_URL;
+    const hasKey = !!import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+    if (!hasUrl || !hasKey) {
+      console.error('[Chart Debug] Missing Supabase Config');
+      setErrorMsg(`Missing Supabase Configuration. URL: ${hasUrl}, Key: ${hasKey}. Check Vercel Environment Variables.`);
+      setIsLoading(false);
+      return;
+    }
+
     async function fetchSpeciesData() {
       try {
-        // Query the 'identifications' table which tracks real user data
-        const { data: identificationsData, error } = await supabase
+        console.log('[Chart Debug] Starting fetch with 5s timeout...');
+
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Request timed out (5000ms)')), 5000)
+        );
+
+        const fetchPromise = supabase
           .from('identifications')
           .select('species, location');
 
-        if (!isMounted) return;
+        const result = await Promise.race([fetchPromise, timeoutPromise]) as any;
 
-        if (error) {
-          console.error('[Chart Debug] Error fetching identifications data:', error);
-          return;
+        // Handle explicit Supabase error
+        if (result.error) {
+          throw result.error;
         }
+
+        const identificationsData = result.data;
+
+        if (!isMounted) return;
 
         console.log('[Chart Debug] Fetched identifications data:', identificationsData?.length, 'records');
 
         if (identificationsData) {
-          // Count species by location
           const locationCounts: Record<string, number> = {};
 
-          identificationsData.forEach((item) => {
+          identificationsData.forEach((item: any) => {
             let location = item.location || 'Unknown';
-            location = location.trim(); // Normalize
+            location = location.trim();
             locationCounts[location] = (locationCounts[location] || 0) + 1;
           });
 
-          console.log('[Chart Debug] Processed location counts:', locationCounts);
-
-          // Convert to array format for Recharts
           const chartData = Object.entries(locationCounts)
             .map(([name, count]) => ({ name, count }))
             .sort((a, b) => b.count - a.count);
 
           setData(chartData);
         }
-      } catch (err) {
-        console.error('[Chart Debug] Unexpected error fetching chart data:', err);
+      } catch (err: any) {
+        console.error('[Chart Debug] Error or Timeout:', err);
+        if (isMounted) {
+          setErrorMsg(err.message || 'Unknown error occurred');
+        }
       } finally {
         if (isMounted) {
           setIsLoading(false);
@@ -75,19 +96,24 @@ export function SpeciesDistributionChart() {
     );
   }
 
-  if (data.length === 0) {
+  if (data.length === 0 || errorMsg) {
     return (
       <section className="py-8">
         <div className="w-full h-[400px] bg-card rounded-2xl p-6 flex flex-col items-center justify-center text-center">
-          <p className="text-red-500 font-semibold mb-2">No data to display</p>
-          <p className="text-sm text-muted-foreground">
-            The database returned 0 records from 'identifications'. RLS might be blocking access.
+          <p className="text-red-500 font-semibold mb-2">
+            {errorMsg ? 'Error Loading Data' : 'No data to display'}
           </p>
-          <div className="mt-4 p-4 bg-gray-100 rounded text-xs text-left overflow-auto max-w-md">
-            <code>
-              Run in Supabase SQL Editor:<br />
-              CREATE POLICY "Public Read Access" ON public.identifications FOR SELECT USING (true);
-            </code>
+          <p className="text-sm text-muted-foreground mb-4">
+            {errorMsg || "The database returned 0 records from 'identifications'. RLS might be blocking access."}
+          </p>
+
+          <div className="bg-gray-100 p-4 rounded text-xs text-left overflow-auto max-w-lg mx-auto">
+            <p className="font-bold mb-1">Troubleshooting:</p>
+            <ul className="list-disc pl-4 space-y-1">
+              <li>Check Vercel Environment Variables (VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY)</li>
+              <li>Ensure "identifications" table exists and has data</li>
+              <li>Check RLS Policies: `CREATE POLICY "Public Read" ON identifications FOR SELECT USING (true);`</li>
+            </ul>
           </div>
         </div>
       </section>
