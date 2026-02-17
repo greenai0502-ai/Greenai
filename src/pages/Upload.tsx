@@ -1,9 +1,9 @@
 import { useState, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Upload, Camera, X, Sparkles, Loader2, MapPin, ExternalLink } from 'lucide-react';
+import { Upload, Camera, X, Sparkles, Loader2, MapPin, ExternalLink, Send } from 'lucide-react';
 import { Navbar } from '@/components/Navbar';
 import { Button } from '@/components/ui/button';
-import { recognizeSpecies, RecognitionResult } from '@/lib/api';
+import { recognizeSpecies, RecognitionResult, submitNewSpecies } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
@@ -14,10 +14,16 @@ export default function UploadPage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<RecognitionResult | null>(null);
+  const [showSubmissionForm, setShowSubmissionForm] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState('');
+  const [submissionNotes, setSubmissionNotes] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const { user } = useAuth();
+
+  const MCC_LOCATIONS = ['QSC', 'BOTANY TANK', 'MMIP', 'CANTEEN', 'ANDERSON HALL'];
 
   const saveIdentification = async (recognition: RecognitionResult) => {
     console.log('saveIdentification called with:', recognition);
@@ -198,8 +204,59 @@ export default function UploadPage() {
     setSelectedImage(null);
     setSelectedFile(null);
     setResult(null);
+    setShowSubmissionForm(false);
+    setSelectedLocation('');
+    setSubmissionNotes('');
     if (fileInputRef.current) fileInputRef.current.value = '';
     if (cameraInputRef.current) cameraInputRef.current.value = '';
+  };
+
+  const handleSubmitNewSpecies = async () => {
+    if (!result || !selectedLocation || !selectedFile) {
+      toast({
+        title: "Missing information",
+        description: "Please select a location",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const speciesName = result.identified_species || result.species || 'Unknown';
+      const speciesType = result.species_type || 'mushroom';
+      
+      const response = await submitNewSpecies({
+        species_name: speciesName,
+        location: selectedLocation,
+        species_type: speciesType,
+        user_id: user?.id || '',
+        user_email: user?.email || '',
+        notes: submissionNotes,
+        image: selectedFile,
+      });
+
+      toast({
+        title: "Submitted Successfully!",
+        description: response.message,
+      });
+
+      // Clear the form
+      setShowSubmissionForm(false);
+      setSelectedLocation('');
+      setSubmissionNotes('');
+      
+    } catch (error: any) {
+      console.error('Submission error:', error);
+      toast({
+        title: "Submission Failed",
+        description: error.message || "Failed to submit species information",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -310,16 +367,16 @@ export default function UploadPage() {
               Choose Different Image
             </Button>
 
-            {/* Error Section - Not a Mushroom */}
+            {/* Error Section - Not a Plant or Mushroom */}
             {result && !result.success && (
               <div className="mt-6 p-6 rounded-2xl bg-red-50 dark:bg-red-950 border-2 border-red-200 dark:border-red-800 space-y-3 animate-fade-in">
                 <div className="flex items-center gap-2">
                   <X className="w-5 h-5 text-red-600 dark:text-red-400" />
-                  <h3 className="font-semibold text-lg text-red-900 dark:text-red-100">Not a Mushroom</h3>
+                  <h3 className="font-semibold text-lg text-red-900 dark:text-red-100">Not a Plant or Mushroom</h3>
                 </div>
                 
                 <p className="text-red-800 dark:text-red-200">
-                  {result.message || "This image doesn't appear to be a mushroom. Please upload a mushroom image."}
+                  {result.message || "This image doesn't appear to be a plant or mushroom. Please upload a plant or mushroom image."}
                 </p>
                 
                 {result.detected_object && (
@@ -340,6 +397,11 @@ export default function UploadPage() {
                 
                 <div className="space-y-2">
                   <div className="flex justify-between items-start">
+                    <span className="text-sm text-muted-foreground">Type:</span>
+                    <span className="font-semibold text-foreground capitalize">{result.species_type || 'Unknown'}</span>
+                  </div>
+                  
+                  <div className="flex justify-between items-start">
                     <span className="text-sm text-muted-foreground">Species:</span>
                     <span className="font-semibold text-foreground text-right">{result.species || result.identified_species}</span>
                   </div>
@@ -355,6 +417,17 @@ export default function UploadPage() {
                     <span className="text-sm text-muted-foreground">Identified by:</span>
                     <span className="text-sm text-foreground">{result.identified_by}</span>
                   </div>
+                  
+                  {result.bioclip_suggestion && result.bioclip_suggestion !== result.species && (
+                    <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800">
+                      <p className="text-xs font-semibold text-blue-900 dark:text-blue-100 mb-1">
+                        ℹ️ Verification Note
+                      </p>
+                      <p className="text-xs text-blue-800 dark:text-blue-200">
+                        AI models initially suggested "{result.bioclip_suggestion}" but after verification, confirmed it as "{result.species}"
+                      </p>
+                    </div>
+                  )}
                   
                   {result.found_in_database && result.location ? (
                     <>
@@ -406,6 +479,19 @@ export default function UploadPage() {
                   )}
                 </div>
 
+                {/* Add to MCC Database Button */}
+                {!result.found_in_database && !showSubmissionForm && (
+                  <div className="mt-4 pt-4 border-t border-border">
+                    <Button
+                      onClick={() => setShowSubmissionForm(true)}
+                      className="w-full h-12 rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold"
+                    >
+                      <MapPin className="w-4 h-4 mr-2" />
+                      Add This Species to MCC Database
+                    </Button>
+                  </div>
+                )}
+
                 {result.top_matches && result.top_matches.length > 0 && (
                   <div className="mt-4 pt-4 border-t border-border">
                     <h4 className="text-sm font-semibold text-foreground mb-2">Top Matches:</h4>
@@ -419,6 +505,94 @@ export default function UploadPage() {
                     </div>
                   </div>
                 )}
+              </div>
+            )}
+
+            {/* Submission Form for Adding Species to MCC Database */}
+            {showSubmissionForm && result && !result.found_in_database && (
+              <div className="mt-6 p-6 rounded-2xl bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950 dark:to-emerald-950 border-2 border-green-200 dark:border-green-800 space-y-4 animate-fade-in">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-semibold text-lg text-green-900 dark:text-green-100">
+                    Add {result.species_type === 'plant' ? 'Plant' : 'Mushroom'} to MCC Database
+                  </h3>
+                  <button
+                    onClick={() => setShowSubmissionForm(false)}
+                    className="p-1 hover:bg-green-200 dark:hover:bg-green-800 rounded transition-colors"
+                  >
+                    <X className="w-5 h-5 text-green-700 dark:text-green-300" />
+                  </button>
+                </div>
+
+                <p className="text-sm text-green-800 dark:text-green-200">
+                  Help us expand our database by telling us where you found this {result.species_type || 'species'} on campus.
+                </p>
+
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium text-green-900 dark:text-green-100 mb-2">
+                      Species Identified: <span className="font-bold">{result.identified_species || result.species}</span>
+                    </label>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-green-900 dark:text-green-100 mb-2">
+                      Location at MCC Campus <span className="text-red-600">*</span>
+                    </label>
+                    <select
+                      value={selectedLocation}
+                      onChange={(e) => setSelectedLocation(e.target.value)}
+                      className="w-full px-4 py-3 rounded-lg border-2 border-green-300 dark:border-green-700 bg-white dark:bg-green-900 text-foreground focus:outline-none focus:ring-2 focus:ring-green-500 transition-all"
+                    >
+                      <option value="">Select a location...</option>
+                      {MCC_LOCATIONS.map((location) => (
+                        <option key={location} value={location}>
+                          {location}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-green-900 dark:text-green-100 mb-2">
+                      Additional Notes (Optional)
+                    </label>
+                    <textarea
+                      value={submissionNotes}
+                      onChange={(e) => setSubmissionNotes(e.target.value)}
+                      placeholder="Any additional information about where you found it, when, or other observations..."
+                      className="w-full px-4 py-3 rounded-lg border-2 border-green-300 dark:border-green-700 bg-white dark:bg-green-900 text-foreground focus:outline-none focus:ring-2 focus:ring-green-500 transition-all resize-none"
+                      rows={3}
+                    />
+                  </div>
+
+                  <div className="flex gap-3 pt-2">
+                    <Button
+                      onClick={handleSubmitNewSpecies}
+                      disabled={!selectedLocation || isSubmitting}
+                      className="flex-1 h-12 rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold"
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Submitting...
+                        </>
+                      ) : (
+                        <>
+                          <Send className="w-4 h-4 mr-2" />
+                          Submit to Database
+                        </>
+                      )}
+                    </Button>
+                    <Button
+                      onClick={() => setShowSubmissionForm(false)}
+                      variant="outline"
+                      disabled={isSubmitting}
+                      className="h-12 px-6 rounded-xl"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
               </div>
             )}
           </div>
