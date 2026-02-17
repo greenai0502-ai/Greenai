@@ -9,18 +9,38 @@ export function SpeciesDistributionChart() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+    console.log('[Chart Debug] Component mounted, starting fetch...');
+
+    // Safety timeout to prevent infinite loading
+    const timeoutId = setTimeout(() => {
+      if (isMounted && isLoading) {
+        console.error('[Chart Debug] Fetch timed out after 10s');
+        setIsLoading(false);
+        // Verify Supabase config
+        console.log('[Chart Debug] Supabase Config Check:', {
+          hasUrl: !!import.meta.env.VITE_SUPABASE_URL,
+          hasKey: !!import.meta.env.VITE_SUPABASE_ANON_KEY
+        });
+      }
+    }, 10000);
+
     async function fetchSpeciesData() {
       try {
+        console.log('[Chart Debug] Calling supabase.from("species").select("location")...');
+
         const { data: speciesData, error } = await supabase
           .from('species')
           .select('location');
 
+        if (!isMounted) return;
+
         if (error) {
-          console.error('Error fetching species data:', error);
+          console.error('[Chart Debug] Error fetching species data:', error);
           return;
         }
 
-        console.log('Fetched species data:', speciesData); // DEBUG LOG
+        console.log('[Chart Debug] Fetched species data:', speciesData?.length, 'records');
 
         if (speciesData) {
           // Count species by location
@@ -32,25 +52,32 @@ export function SpeciesDistributionChart() {
             locationCounts[location] = (locationCounts[location] || 0) + 1;
           });
 
-          console.log('Processed location counts:', locationCounts); // DEBUG LOG
+          console.log('[Chart Debug] Processed location counts:', locationCounts);
 
           // Convert to array format for Recharts
           const chartData = Object.entries(locationCounts)
             .map(([name, count]) => ({ name, count }))
             .sort((a, b) => b.count - a.count);
 
-          console.log('Final Chart Data:', chartData); // DEBUG LOG
-
+          console.log('[Chart Debug] Final Chart Data:', chartData);
           setData(chartData);
         }
       } catch (err) {
-        console.error('Unexpected error fetching chart data:', err);
+        console.error('[Chart Debug] Unexpected error fetching chart data:', err);
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          clearTimeout(timeoutId);
+          setIsLoading(false);
+        }
       }
     }
 
     fetchSpeciesData();
+
+    return () => {
+      isMounted = false;
+      clearTimeout(timeoutId);
+    };
   }, []);
 
   const COLORS = ['#10B981', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#6366F1', '#14B8A6'];
