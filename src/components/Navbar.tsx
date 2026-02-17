@@ -55,11 +55,10 @@ export function Navbar() {
               <Link
                 key={path}
                 to={path}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 ${
-                  location.pathname === path
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 ${location.pathname === path
                     ? 'bg-primary text-primary-foreground'
                     : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
-                }`}
+                  }`}
               >
                 <Icon className="w-4 h-4" />
                 <span className="text-sm font-medium">{label}</span>
@@ -77,7 +76,7 @@ export function Navbar() {
 
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden p-2 rounded-lg hover:bg-secondary"
+            className="md:hidden p-3 rounded-lg hover:bg-secondary active:scale-95 transition-all text-foreground"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -92,11 +91,10 @@ export function Navbar() {
                 key={path}
                 to={path}
                 onClick={() => setMobileMenuOpen(false)}
-                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
-                  location.pathname === path
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${location.pathname === path
                     ? 'bg-primary text-primary-foreground'
                     : 'text-muted-foreground hover:bg-secondary'
-                }`}
+                  }`}
               >
                 <Icon className="w-5 h-5" />
                 <span className="font-medium">{label}</span>

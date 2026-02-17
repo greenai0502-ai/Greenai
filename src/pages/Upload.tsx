@@ -353,7 +353,7 @@ export default function UploadPage() {
               <img
                 src={selectedImage}
                 alt="Selected"
-                className="w-full aspect-[4/3] object-cover"
+                className="w-full h-auto max-h-[70vh] object-contain bg-secondary/20"
               />
               <button
                 onClick={clearImage}
@@ -566,7 +566,7 @@ export default function UploadPage() {
                     <select
                       value={selectedLocation}
                       onChange={(e) => setSelectedLocation(e.target.value)}
-                      className="w-full px-4 py-3 rounded-lg border-2 border-green-300 dark:border-green-700 bg-white dark:bg-green-900 text-foreground focus:outline-none focus:ring-2 focus:ring-green-500 transition-all"
+                      className="w-full px-4 py-3 rounded-lg border-2 border-green-300 dark:border-green-700 bg-white dark:bg-green-900 text-foreground text-base focus:outline-none focus:ring-2 focus:ring-green-500 transition-all"
                     >
                       <option value="">Select a location...</option>
                       {MCC_LOCATIONS.map((location) => (
@@ -585,7 +585,7 @@ export default function UploadPage() {
                       value={submissionNotes}
                       onChange={(e) => setSubmissionNotes(e.target.value)}
                       placeholder="Any additional information about where you found it, when, or other observations..."
-                      className="w-full px-4 py-3 rounded-lg border-2 border-green-300 dark:border-green-700 bg-white dark:bg-green-900 text-foreground focus:outline-none focus:ring-2 focus:ring-green-500 transition-all resize-none"
+                      className="w-full px-4 py-3 rounded-lg border-2 border-green-300 dark:border-green-700 bg-white dark:bg-green-900 text-foreground text-base focus:outline-none focus:ring-2 focus:ring-green-500 transition-all resize-none"
                       rows={3}
                     />
                   </div>
