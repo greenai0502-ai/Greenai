@@ -55,6 +55,35 @@ export function SpeciesDistributionChart() {
 
   const COLORS = ['#10B981', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#6366F1', '#14B8A6'];
 
+  if (isLoading) {
+    return (
+      <section className="py-8">
+        <div className="w-full h-[400px] bg-card rounded-2xl p-6 flex items-center justify-center">
+          <p className="text-muted-foreground animate-pulse">Loading chart data...</p>
+        </div>
+      </section>
+    );
+  }
+
+  if (data.length === 0) {
+    return (
+      <section className="py-8">
+        <div className="w-full h-[400px] bg-card rounded-2xl p-6 flex flex-col items-center justify-center text-center">
+          <p className="text-red-500 font-semibold mb-2">No data to display</p>
+          <p className="text-sm text-muted-foreground">
+            The database returned 0 records. This usually means Row Level Security (RLS) is blocking access.
+          </p>
+          <div className="mt-4 p-4 bg-gray-100 rounded text-xs text-left overflow-auto max-w-md">
+            <code>
+              Run this in Supabase SQL Editor:<br />
+              CREATE POLICY "Public Read Access" ON public.species FOR SELECT USING (true);
+            </code>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="py-8">
       <div className="flex items-center gap-3 mb-6">
@@ -62,7 +91,7 @@ export function SpeciesDistributionChart() {
           <TrendingUp className="w-5 h-5" />
         </div>
         <h2 className="font-display text-2xl font-semibold text-foreground">
-          Species Distribution by Area
+          Species Distribution by Area ({data.reduce((acc, curr) => acc + curr.count, 0)} items)
         </h2>
       </div>
 
