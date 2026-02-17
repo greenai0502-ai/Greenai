@@ -28,7 +28,7 @@ export default function UploadPage() {
   const saveIdentification = async (recognition: RecognitionResult) => {
     console.log('saveIdentification called with:', recognition);
     console.log('Current user:', user);
-    
+
     if (!user?.id) {
       console.error('User not logged in, skipping save to database');
       toast({
@@ -51,10 +51,10 @@ export default function UploadPage() {
         latitude: recognition.latitude || null,
         longitude: recognition.longitude || null,
       };
-      
+
       console.log('Data to insert:', dataToInsert);
       console.log('Inserting into database using direct fetch...');
-      
+
       // Skip session fetch entirely - just hardcode auth check from context
       if (!user?.id) {
         console.error('No user in context');
@@ -65,23 +65,23 @@ export default function UploadPage() {
         });
         return false;
       }
-      
+
       console.log('Getting session from localStorage...');
       const authStorage = localStorage.getItem('sb-zzgdtsofmffjnthpihrs-auth-token');
       if (!authStorage) {
         console.error('No auth token in localStorage');
         toast({
-          title: "Not authenticated", 
+          title: "Not authenticated",
           description: "Please log in again",
           variant: "destructive",
         });
         return false;
       }
-      
+
       const authData = JSON.parse(authStorage);
       const accessToken = authData?.access_token;
       console.log('Access token found:', !!accessToken);
-      
+
       if (!accessToken) {
         console.error('No access token');
         toast({
@@ -91,10 +91,10 @@ export default function UploadPage() {
         });
         return false;
       }
-      
+
       // Use direct fetch with token from localStorage
       console.log('Sending fetch request...');
-      
+
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/identifications`,
         {
@@ -108,9 +108,9 @@ export default function UploadPage() {
           body: JSON.stringify(dataToInsert)
         }
       );
-      
+
       console.log('Fetch completed!');
-      
+
       console.log('Insert completed! Status:', response.status);
 
       if (!response.ok) {
@@ -123,7 +123,7 @@ export default function UploadPage() {
         });
         return false;
       }
-      
+
       console.log('Identification saved successfully');
       window.dispatchEvent(new CustomEvent('identification-saved'));
       toast({
@@ -131,7 +131,7 @@ export default function UploadPage() {
         description: "Identification saved to your profile",
       });
       return true;
-      
+
     } catch (error: any) {
       console.error('Exception saving identification:', error);
       toast({
@@ -157,25 +157,25 @@ export default function UploadPage() {
 
   const handleAnalyze = async () => {
     if (!selectedFile) return;
-    
+
     console.log('Starting analysis...');
     setIsAnalyzing(true);
     setResult(null);
-    
+
     try {
       const response = await recognizeSpecies(selectedFile);
       console.log('API response:', response);
       setResult(response);
-      
+
       if (response.success) {
         const speciesName = response.species || response.identified_species || 'Unknown';
-        const confidenceText = response.confidence 
+        const confidenceText = response.confidence
           ? `${(response.confidence * 100).toFixed(1)}% confidence`
           : 'confidence unavailable';
-        
+
         // Save to database
         await saveIdentification(response);
-        
+
         toast({
           title: "Species Identified!",
           description: `Found: ${speciesName} (${confidenceText})`,
@@ -226,7 +226,14 @@ export default function UploadPage() {
     try {
       const speciesName = result.identified_species || result.species || 'Unknown';
       const speciesType = result.species_type || 'mushroom';
-      
+
+      console.log('Submitting new species:', {
+        species_name: speciesName,
+        location: selectedLocation,
+        species_type: speciesType,
+        user_id: user?.id,
+      });
+
       const response = await submitNewSpecies({
         species_name: speciesName,
         location: selectedLocation,
@@ -237,21 +244,39 @@ export default function UploadPage() {
         image: selectedFile,
       });
 
+      console.log('Submission successful:', response);
+
       toast({
-        title: "Submitted Successfully!",
-        description: response.message,
+        title: "✅ Successfully Added to Database!",
+        description: response.message || `${speciesName} has been added to the MCC database at ${selectedLocation}`,
       });
 
       // Clear the form
       setShowSubmissionForm(false);
       setSelectedLocation('');
       setSubmissionNotes('');
-      
+
     } catch (error: any) {
       console.error('Submission error:', error);
+
+      // Parse error message to provide specific feedback
+      let errorTitle = "Submission Failed";
+      let errorDescription = error.message || "Failed to submit species information";
+
+      if (error.message?.includes('already exists')) {
+        errorTitle = "Duplicate Species";
+        errorDescription = error.message;
+      } else if (error.message?.includes('permission')) {
+        errorTitle = "Permission Denied";
+        errorDescription = "You don't have permission to add species. Please contact an administrator.";
+      } else if (error.message?.includes('network') || error.message?.includes('fetch')) {
+        errorTitle = "Connection Error";
+        errorDescription = "Unable to connect to the server. Please check your internet connection.";
+      }
+
       toast({
-        title: "Submission Failed",
-        description: error.message || "Failed to submit species information",
+        title: errorTitle,
+        description: errorDescription,
         variant: "destructive",
       });
     } finally {
@@ -374,11 +399,11 @@ export default function UploadPage() {
                   <X className="w-5 h-5 text-red-600 dark:text-red-400" />
                   <h3 className="font-semibold text-lg text-red-900 dark:text-red-100">Not a Plant or Mushroom</h3>
                 </div>
-                
+
                 <p className="text-red-800 dark:text-red-200">
                   {result.message || "This image doesn't appear to be a plant or mushroom. Please upload a plant or mushroom image."}
                 </p>
-                
+
                 {result.detected_object && (
                   <div className="pt-2 border-t border-red-200 dark:border-red-800">
                     <p className="text-sm text-red-700 dark:text-red-300">
@@ -394,30 +419,30 @@ export default function UploadPage() {
             {result && result.success && (
               <div className="mt-6 p-6 rounded-2xl bg-card border border-border space-y-4 animate-fade-in">
                 <h3 className="font-semibold text-lg text-foreground">Recognition Results</h3>
-                
+
                 <div className="space-y-2">
                   <div className="flex justify-between items-start">
                     <span className="text-sm text-muted-foreground">Type:</span>
                     <span className="font-semibold text-foreground capitalize">{result.species_type || 'Unknown'}</span>
                   </div>
-                  
+
                   <div className="flex justify-between items-start">
                     <span className="text-sm text-muted-foreground">Species:</span>
                     <span className="font-semibold text-foreground text-right">{result.species || result.identified_species}</span>
                   </div>
-                  
+
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-muted-foreground">Confidence:</span>
                     <span className="font-semibold text-green-600">
                       {result.confidence ? (result.confidence * 100).toFixed(1) : 'N/A'}%
                     </span>
                   </div>
-                  
+
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-muted-foreground">Identified by:</span>
                     <span className="text-sm text-foreground">{result.identified_by}</span>
                   </div>
-                  
+
                   {result.bioclip_suggestion && result.bioclip_suggestion !== result.species && (
                     <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800">
                       <p className="text-xs font-semibold text-blue-900 dark:text-blue-100 mb-1">
@@ -428,7 +453,7 @@ export default function UploadPage() {
                       </p>
                     </div>
                   )}
-                  
+
                   {result.found_in_database && result.location ? (
                     <>
                       <div className="flex justify-between items-start">
@@ -438,7 +463,7 @@ export default function UploadPage() {
                           {result.location}
                         </span>
                       </div>
-                      
+
                       {result.latitude && result.longitude && (
                         <div className="flex flex-col gap-2">
                           <div className="flex justify-between items-start">
@@ -447,7 +472,7 @@ export default function UploadPage() {
                               {result.latitude.toFixed(5)}, {result.longitude.toFixed(5)}
                             </span>
                           </div>
-                          
+
                           <a
                             href={`https://www.google.com/maps?q=${result.latitude},${result.longitude}`}
                             target="_blank"
@@ -469,7 +494,7 @@ export default function UploadPage() {
                       </span>
                     </div>
                   )}
-                  
+
                   {!result.found_in_database && result.message && (
                     <div className="p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
                       <p className="text-sm text-yellow-700 dark:text-yellow-400">

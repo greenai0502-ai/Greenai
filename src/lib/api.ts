@@ -74,10 +74,28 @@ export const submitNewSpecies = async (submission: SpeciesSubmission): Promise<S
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({ detail: 'Failed to submit species' }));
-    throw new Error(errorData.detail || 'Failed to submit species');
+    const errorMessage = errorData.detail || 'Failed to submit species';
+    
+    // Log the error for debugging
+    console.error('Species submission failed:', {
+      status: response.status,
+      statusText: response.statusText,
+      error: errorMessage
+    });
+    
+    throw new Error(errorMessage);
   }
 
-  return response.json();
+  const data = await response.json();
+  
+  // Verify the response indicates success
+  if (!data.success) {
+    console.error('Backend returned success=false:', data);
+    throw new Error(data.message || 'Failed to save species to database');
+  }
+  
+  console.log('Species submitted successfully:', data);
+  return data;
 };
 
 export const checkHealth = async (): Promise<{ status: string }> => {
