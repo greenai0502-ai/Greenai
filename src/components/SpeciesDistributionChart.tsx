@@ -10,44 +10,30 @@ export function SpeciesDistributionChart() {
 
   useEffect(() => {
     let isMounted = true;
-    console.log('[Chart Debug] Component mounted, starting fetch...');
-
-    // Safety timeout to prevent infinite loading
-    const timeoutId = setTimeout(() => {
-      if (isMounted && isLoading) {
-        console.error('[Chart Debug] Fetch timed out after 10s');
-        setIsLoading(false);
-        // Verify Supabase config
-        console.log('[Chart Debug] Supabase Config Check:', {
-          hasUrl: !!import.meta.env.VITE_SUPABASE_URL,
-          hasKey: !!import.meta.env.VITE_SUPABASE_ANON_KEY
-        });
-      }
-    }, 10000);
+    console.log('[Chart Debug] Component mounted, starting fetch from "identifications"...');
 
     async function fetchSpeciesData() {
       try {
-        console.log('[Chart Debug] Calling supabase.from("species").select("location")...');
-
-        const { data: speciesData, error } = await supabase
-          .from('species')
-          .select('location');
+        // Query the 'identifications' table which tracks real user data
+        const { data: identificationsData, error } = await supabase
+          .from('identifications')
+          .select('species, location');
 
         if (!isMounted) return;
 
         if (error) {
-          console.error('[Chart Debug] Error fetching species data:', error);
+          console.error('[Chart Debug] Error fetching identifications data:', error);
           return;
         }
 
-        console.log('[Chart Debug] Fetched species data:', speciesData?.length, 'records');
+        console.log('[Chart Debug] Fetched identifications data:', identificationsData?.length, 'records');
 
-        if (speciesData) {
+        if (identificationsData) {
           // Count species by location
           const locationCounts: Record<string, number> = {};
 
-          speciesData.forEach((species) => {
-            let location = species.location || 'Unknown';
+          identificationsData.forEach((item) => {
+            let location = item.location || 'Unknown';
             location = location.trim(); // Normalize
             locationCounts[location] = (locationCounts[location] || 0) + 1;
           });
@@ -59,14 +45,12 @@ export function SpeciesDistributionChart() {
             .map(([name, count]) => ({ name, count }))
             .sort((a, b) => b.count - a.count);
 
-          console.log('[Chart Debug] Final Chart Data:', chartData);
           setData(chartData);
         }
       } catch (err) {
         console.error('[Chart Debug] Unexpected error fetching chart data:', err);
       } finally {
         if (isMounted) {
-          clearTimeout(timeoutId);
           setIsLoading(false);
         }
       }
@@ -76,7 +60,6 @@ export function SpeciesDistributionChart() {
 
     return () => {
       isMounted = false;
-      clearTimeout(timeoutId);
     };
   }, []);
 
@@ -98,12 +81,12 @@ export function SpeciesDistributionChart() {
         <div className="w-full h-[400px] bg-card rounded-2xl p-6 flex flex-col items-center justify-center text-center">
           <p className="text-red-500 font-semibold mb-2">No data to display</p>
           <p className="text-sm text-muted-foreground">
-            The database returned 0 records. This usually means Row Level Security (RLS) is blocking access.
+            The database returned 0 records from 'identifications'. RLS might be blocking access.
           </p>
           <div className="mt-4 p-4 bg-gray-100 rounded text-xs text-left overflow-auto max-w-md">
             <code>
-              Run this in Supabase SQL Editor:<br />
-              CREATE POLICY "Public Read Access" ON public.species FOR SELECT USING (true);
+              Run in Supabase SQL Editor:<br />
+              CREATE POLICY "Public Read Access" ON public.identifications FOR SELECT USING (true);
             </code>
           </div>
         </div>
