@@ -173,22 +173,22 @@ export function SpeciesDistributionChart() {
         </h2>
       </div>
 
-      <div className="w-full h-[400px] bg-card rounded-2xl p-6 shadow-sm border border-border">
-        <div className="flex items-center gap-2 mb-4 text-sm text-muted-foreground">
-          <MapPin className="w-4 h-4" />
+      <div className={`w-full ${isMobile ? 'h-[600px]' : 'h-[400px]'} bg-card rounded-2xl p-4 md:p-6 shadow-sm border border-border`}>
+        <div className="flex items-center gap-2 mb-4 text-xs md:text-sm text-muted-foreground">
+          <MapPin className="w-3 h-3 md:w-4 md:h-4" />
           <span>Number of discovered species per location</span>
         </div>
 
         <ResponsiveContainer width="100%" height="100%">
           {isMobile ? (
-            <PieChart>
+            <PieChart margin={{ top: 20, bottom: 20 }}>
               <Pie
                 data={data}
                 cx="50%"
-                cy="50%"
+                cy="40%"
                 labelLine={false}
                 label={renderCustomizedLabel}
-                outerRadius={120}
+                outerRadius={90}
                 fill="#8884d8"
                 dataKey="count"
               >
@@ -201,10 +201,16 @@ export function SpeciesDistributionChart() {
                   backgroundColor: 'rgba(255, 255, 255, 0.95)',
                   borderRadius: '8px',
                   border: '1px solid #E5E7EB',
-                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                  fontSize: '12px'
                 }}
               />
-              <Legend />
+              <Legend
+                layout="horizontal"
+                verticalAlign="bottom"
+                align="center"
+                wrapperStyle={{ fontSize: '11px', paddingTop: '20px' }}
+              />
             </PieChart>
           ) : (
             <BarChart
