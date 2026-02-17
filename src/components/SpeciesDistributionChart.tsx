@@ -27,35 +27,41 @@ export function SpeciesDistributionChart() {
 
     async function fetchSpeciesData() {
       try {
-        console.log('[Chart Debug] Starting fetch with 5s timeout...');
+        console.log('[Chart Debug] Starting fetch (primary: identifications)...');
+        let usedTable = 'identifications';
 
-        const timeoutPromise = new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Request timed out (15000ms) - Database might be paused or slow')), 15000)
-        );
-
-        const fetchPromise = supabase
+        // Try fetching from 'identifications' first
+        let { data, error } = await supabase
           .from('identifications')
           .select('species, location');
 
-        const result = await Promise.race([fetchPromise, timeoutPromise]) as any;
+        // If that fails, try 'species'
+        if (error) {
+          console.warn('[Chart Debug] Failed to fetch from "identifications", trying "species"...', error.message);
+          usedTable = 'species';
 
-        // Handle explicit Supabase error
-        if (result.error) {
-          throw result.error;
+          const speciesResult = await supabase
+            .from('species')
+            .select('location');
+
+          data = speciesResult.data as any;
+          error = speciesResult.error;
         }
-
-        const identificationsData = result.data;
 
         if (!isMounted) return;
 
-        console.log('[Chart Debug] Fetched identifications data:', identificationsData?.length, 'records');
+        if (error) {
+          throw error;
+        }
 
-        if (identificationsData) {
+        console.log(`[Chart Debug] Fetched data from "${usedTable}":`, data?.length, 'records');
+
+        if (data) {
           const locationCounts: Record<string, number> = {};
 
-          identificationsData.forEach((item: any) => {
+          data.forEach((item: any) => {
             let location = item.location || 'Unknown';
-            location = location.trim();
+            location = location.trim(); // Normalize
             locationCounts[location] = (locationCounts[location] || 0) + 1;
           });
 
@@ -66,7 +72,7 @@ export function SpeciesDistributionChart() {
           setData(chartData);
         }
       } catch (err: any) {
-        console.error('[Chart Debug] Error or Timeout:', err);
+        console.error('[Chart Debug] Error:', err);
         if (isMounted) {
           setErrorMsg(err.message || 'Unknown error occurred');
         }
@@ -86,6 +92,11 @@ export function SpeciesDistributionChart() {
 
   const COLORS = ['#10B981', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#6366F1', '#14B8A6'];
 
+  // Debug helper to show partial config
+  const debugUrl = import.meta.env.VITE_SUPABASE_URL
+    ? `${import.meta.env.VITE_SUPABASE_URL.substring(0, 15)}...`
+    : 'Undefined';
+
   if (isLoading) {
     return (
       <section className="py-8">
@@ -101,24 +112,32 @@ export function SpeciesDistributionChart() {
       <section className="py-8">
         <div className="w-full h-[400px] bg-card rounded-2xl p-6 flex flex-col items-center justify-center text-center">
           <p className="text-red-500 font-semibold mb-2">
-            {errorMsg ? 'Error Loading Data' : 'No data to display'}
+            {errorMsg ? 'Connection Error' : 'No data to display'}
           </p>
           <p className="text-sm text-muted-foreground mb-4">
-            {errorMsg || "The database returned 0 records from 'identifications'. RLS might be blocking access."}
+            {errorMsg || "0 records found. RLS might be blocking access."}
           </p>
 
           <div className="bg-gray-100 p-4 rounded text-xs text-left overflow-auto max-w-lg mx-auto">
-            <p className="font-bold mb-1">Troubleshooting:</p>
+            <p className="font-bold mb-1">Diagnostic Info:</p>
             <ul className="list-disc pl-4 space-y-1">
-              <li>Check Vercel Environment Variables (VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY)</li>
-              <li>Ensure "identifications" table exists and has data</li>
-              <li>Check RLS Policies: `CREATE POLICY "Public Read" ON identifications FOR SELECT USING (true);`</li>
+              <li><strong>Configured URL:</strong> {debugUrl}</li>
+              <li><strong>Tables Checked:</strong> identifications, species</li>
+              <li><strong>Status:</strong> {errorMsg ? 'Failed' : 'Empty'}</li>
+            </ul>
+            <p className="mt-2 font-bold">Troubleshooting:</p>
+            <ul className="list-disc pl-4 space-y-1">
+              <li>Check browser console for [Supabase Init] logs</li>
+              <li>Disable ad-blockers (uBlock Origin can block database calls)</li>
+              <li>Verify permissions (RLS) for 'identifications' OR 'species' tables</li>
             </ul>
           </div>
           <div className="mt-4 p-4 bg-gray-100 rounded text-xs text-left overflow-auto max-w-md">
             <code>
               Run in Supabase SQL Editor:<br />
-              CREATE POLICY "Public Read Access" ON public.identifications FOR SELECT USING (true);
+              CREATE POLICY "Public Read" ON public.identifications FOR SELECT USING (true);<br />
+              -- OR --<br />
+              CREATE POLICY "Public Read" ON public.species FOR SELECT USING (true);
             </code>
           </div>
           <button

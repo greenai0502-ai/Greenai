@@ -1,16 +1,25 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = (import.meta.env.VITE_SUPABASE_URL || '').trim();
+// Ensure URL has protocol and no trailing slash
+const formatUrl = (url: string) => {
+  if (!url) return '';
+  let formatted = url.trim();
+  if (!formatted.startsWith('http')) {
+    formatted = `https://${formatted}`;
+  }
+  return formatted.replace(/\/$/, '');
+};
+
+const supabaseUrl = formatUrl(import.meta.env.VITE_SUPABASE_URL || '');
 const supabaseAnonKey = (import.meta.env.VITE_SUPABASE_ANON_KEY || '').trim();
 
 // Debug logging for production troubleshooting
 const urlDebug = supabaseUrl ? `${supabaseUrl.substring(0, 15)}...${supabaseUrl.substring(supabaseUrl.length - 5)}` : 'MISSING';
-console.log(`[Supabase Init] URL: ${urlDebug} (Length: ${supabaseUrl?.length})`);
-console.log(`[Supabase Init] Key exists: ${!!supabaseAnonKey} (Length: ${supabaseAnonKey?.length})`);
+console.log(`[Supabase Init] URL: ${urlDebug}`);
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('Missing environment variables:', { supabaseUrl, supabaseAnonKey: supabaseAnonKey ? 'exists' : 'missing' });
-  throw new Error('Missing Supabase environment variables. Please check your .env file.');
+  console.error('Missing environment variables');
+  throw new Error('Missing Supabase environment variables');
 }
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
