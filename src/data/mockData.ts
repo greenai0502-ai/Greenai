@@ -9,42 +9,69 @@ export interface Species {
 }
 
 export const mockSpecies: Species[] = [
-  // Plants
+  // Plants (Updated from MCC Campus Survey)
   {
     id: 'p1',
-    name: 'Neem',
-    scientificName: 'Azadirachta indica',
-    location: 'Hostel Area',
-    description: 'A fast-growing evergreen tree native to the Indian subcontinent. Known for its medicinal properties and ability to purify air.',
+    name: "Devil's Tree",
+    scientificName: 'Alstonia scholaris',
+    location: 'Anderson Hall',
+    description: 'A tropical evergreen tree with distinct whorled leaves and scented flowers. Known locally as Ezhilam Pala.',
     category: 'plants',
-    image: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?w=400&h=300&fit=crop',
+    image: '/images/plants/alstonia_scholaris.jpg',
   },
   {
     id: 'p2',
-    name: 'Tulsi',
-    scientificName: 'Ocimum tenuiflorum',
-    location: 'Temple Garden',
-    description: 'Sacred basil plant with aromatic leaves. Widely used in Ayurvedic medicine and religious ceremonies.',
+    name: 'Orange Jasmine',
+    scientificName: 'Murraya paniculata',
+    location: 'MMIP',
+    description: 'A small tropical evergreen shrub with white, fragrant flowers. Often used as an ornamental hedge.',
     category: 'plants',
-    image: 'https://images.unsplash.com/photo-1518495973542-4542c06a5843?w=400&h=300&fit=crop',
+    image: '/images/plants/murraya_paniculata.jpg',
   },
   {
     id: 'p3',
-    name: 'Fern',
-    scientificName: 'Pteridophyta',
-    location: 'Botany Lab',
-    description: 'Ancient vascular plants that reproduce via spores. Thrives in moist, shaded environments.',
+    name: 'Screw Pine',
+    scientificName: 'Pandanus baptistii',
+    location: 'Canteen',
+    description: 'Known for its spiral arrangement of leaves and prop roots. A decorative variety of Pandanus.',
     category: 'plants',
-    image: 'https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?w=400&h=300&fit=crop',
+    image: '/images/plants/pandanus_baptistii.jpg',
   },
   {
     id: 'p4',
-    name: 'Monstera',
-    scientificName: 'Monstera deliciosa',
-    location: 'Library Entrance',
-    description: 'Popular ornamental plant with distinctive split leaves. Native to tropical forests of Central America.',
+    name: 'Otaheite Gooseberry',
+    scientificName: 'Phyllanthus acidus',
+    location: 'QSC',
+    description: 'Small tree bearing sour, edible yellow fruits. The fruits are used in pickles and jams.',
     category: 'plants',
-    image: 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?w=400&h=300&fit=crop',
+    image: '/images/plants/phyllanthus_acidus.jpg',
+  },
+  {
+    id: 'p5',
+    name: 'False Ashoka',
+    scientificName: 'Polyalthia longifolia',
+    location: 'Botany Tank',
+    description: 'Tall, lofty evergreen tree native to India. Common in avenue planting due to its effective noise pollution control.',
+    category: 'plants',
+    image: '/images/plants/polyalthia_longifolia.jpg',
+  },
+  {
+    id: 'p6',
+    name: 'Wild Coffee',
+    scientificName: 'Psychotria nervosa',
+    location: 'QSC',
+    description: 'Shrub native to Florida but found in tropical regions. Known for its "coffee bean" like red fruits which attract birds.',
+    category: 'plants',
+    image: '/images/plants/psychotria_nervosa.jpg',
+  },
+  {
+    id: 'p7',
+    name: 'Cardboard Palm',
+    scientificName: 'Zamia furfuracea',
+    location: 'QSC',
+    description: 'Cycad with thick, leathery leaves that resemble cardboard. Not a true palm but an ancient plant lineage.',
+    category: 'plants',
+    image: '/images/plants/zamia_furfuracea.jpg',
   },
   // Flowers
   {
@@ -122,8 +149,8 @@ export const mockSpecies: Species[] = [
   },
 ];
 
-export const getSpeciesByCategory = (category: Species['category']) => 
+export const getSpeciesByCategory = (category: Species['category']) =>
   mockSpecies.filter(s => s.category === category);
 
-export const getSpeciesById = (id: string) => 
+export const getSpeciesById = (id: string) =>
   mockSpecies.find(s => s.id === id);
