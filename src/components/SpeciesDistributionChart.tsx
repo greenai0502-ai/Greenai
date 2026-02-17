@@ -1,11 +1,24 @@
 import { useEffect, useState } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, PieChart, Pie, Legend } from 'recharts';
 import { MapPin, TrendingUp } from 'lucide-react';
 
 export function SpeciesDistributionChart() {
   const [data, setData] = useState<{ name: string; count: number }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    // Check for mobile on mount and resize
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -91,6 +104,19 @@ export function SpeciesDistributionChart() {
   const COLORS = ['#10B981', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#6366F1', '#14B8A6'];
   const csvFile = '/data/species_data.csv';
 
+  // Custom Label for Pie Chart
+  const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: any) => {
+    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+    const x = cx + radius * Math.cos(-midAngle * Math.PI / 180);
+    const y = cy + radius * Math.sin(-midAngle * Math.PI / 180);
+
+    return (
+      <text x={x} y={y} fill="white" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central">
+        {`${(percent * 100).toFixed(0)}%`}
+      </text>
+    );
+  };
+
   if (isLoading) {
     return (
       <section className="py-8">
@@ -154,45 +180,73 @@ export function SpeciesDistributionChart() {
         </div>
 
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart
-            data={data}
-            margin={{
-              top: 20,
-              right: 30,
-              left: 20,
-              bottom: 60,
-            }}
-          >
-            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
-            <XAxis
-              dataKey="name"
-              angle={-45}
-              textAnchor="end"
-              interval={0}
-              height={80}
-              tick={{ fontSize: 12, fill: '#6B7280' }}
-              stroke="#D1D5DB"
-            />
-            <YAxis
-              allowDecimals={false}
-              tick={{ fontSize: 12, fill: '#6B7280' }}
-              stroke="#D1D5DB"
-            />
-            <Tooltip
-              cursor={{ fill: 'rgba(0, 0, 0, 0.05)' }}
-              contentStyle={{
-                backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                borderRadius: '8px',
-                border: '1px solid #E5E7EB',
-                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+          {isMobile ? (
+            <PieChart>
+              <Pie
+                data={data}
+                cx="50%"
+                cy="50%"
+                labelLine={false}
+                label={renderCustomizedLabel}
+                outerRadius={120}
+                fill="#8884d8"
+                dataKey="count"
+              >
+                {data.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                  borderRadius: '8px',
+                  border: '1px solid #E5E7EB',
+                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                }}
+              />
+              <Legend />
+            </PieChart>
+          ) : (
+            <BarChart
+              data={data}
+              margin={{
+                top: 20,
+                right: 30,
+                left: 20,
+                bottom: 60,
               }}
-            />
-            <Bar dataKey="count" radius={[4, 4, 0, 0]} animationDuration={1500}>
-              {data.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-              ))}
-            </Bar>
-          </BarChart>
+            >
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
+              <XAxis
+                dataKey="name"
+                angle={-45}
+                textAnchor="end"
+                interval={0}
+                height={80}
+                tick={{ fontSize: 12, fill: '#6B7280' }}
+                stroke="#D1D5DB"
+              />
+              <YAxis
+                allowDecimals={false}
+                tick={{ fontSize: 12, fill: '#6B7280' }}
+                stroke="#D1D5DB"
+              />
+              <Tooltip
+                cursor={{ fill: 'rgba(0, 0, 0, 0.05)' }}
+                contentStyle={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                  borderRadius: '8px',
+                  border: '1px solid #E5E7EB',
+                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                }}
+              />
+              <Bar dataKey="count" radius={[4, 4, 0, 0]} animationDuration={1500}>
+                {data.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Bar>
+            </BarChart>
+          )}
         </ResponsiveContainer>
       </div>
     </section>
