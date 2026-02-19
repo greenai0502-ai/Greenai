@@ -102,16 +102,36 @@ export function SpeciesDistributionChart() {
   }, []);
 
   const COLORS = ['#10B981', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#6366F1', '#14B8A6'];
+  const OTHER_COLOR = '#9CA3AF'; // Gray for 'Others'
   const csvFile = '/data/species_data.csv';
+
+  // Prepare data for mobile (group small values)
+  const getMobileData = () => {
+    if (data.length <= 6) return data;
+
+    const topItems = data.slice(0, 5);
+    const otherItems = data.slice(5);
+    const otherCount = otherItems.reduce((sum, item) => sum + item.count, 0);
+
+    return [
+      ...topItems,
+      { name: 'Others', count: otherCount }
+    ];
+  };
+
+  const mobileData = isMobile ? getMobileData() : [];
 
   // Custom Label for Pie Chart
   const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: any) => {
+    // Only show label if percentage is significant (> 5%)
+    if (percent < 0.05) return null;
+
     const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
     const x = cx + radius * Math.cos(-midAngle * Math.PI / 180);
     const y = cy + radius * Math.sin(-midAngle * Math.PI / 180);
 
     return (
-      <text x={x} y={y} fill="white" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central">
+      <text x={x} y={y} fill="white" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central" fontSize={12} fontWeight="bold">
         {`${(percent * 100).toFixed(0)}%`}
       </text>
     );
@@ -173,7 +193,7 @@ export function SpeciesDistributionChart() {
         </h2>
       </div>
 
-      <div className={`w-full ${isMobile ? 'h-[600px]' : 'h-[400px]'} bg-card rounded-2xl p-4 md:p-6 shadow-sm border border-border`}>
+      <div className={`w-full ${isMobile ? 'h-[500px]' : 'h-[400px]'} bg-card rounded-2xl p-4 md:p-6 shadow-sm border border-border`}>
         <div className="flex items-center gap-2 mb-4 text-xs md:text-sm text-muted-foreground">
           <MapPin className="w-3 h-3 md:w-4 md:h-4" />
           <span>Number of discovered species per location</span>
@@ -183,17 +203,21 @@ export function SpeciesDistributionChart() {
           {isMobile ? (
             <PieChart margin={{ top: 20, bottom: 20 }}>
               <Pie
-                data={data}
+                data={mobileData}
                 cx="50%"
-                cy="40%"
+                cy="45%"
                 labelLine={false}
                 label={renderCustomizedLabel}
-                outerRadius={90}
+                outerRadius={100}
                 fill="#8884d8"
                 dataKey="count"
+                paddingAngle={2}
               >
-                {data.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                {mobileData.map((entry, index) => (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={entry.name === 'Others' ? OTHER_COLOR : COLORS[index % COLORS.length]}
+                  />
                 ))}
               </Pie>
               <Tooltip
@@ -209,7 +233,7 @@ export function SpeciesDistributionChart() {
                 layout="horizontal"
                 verticalAlign="bottom"
                 align="center"
-                wrapperStyle={{ fontSize: '11px', paddingTop: '20px' }}
+                wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }}
               />
             </PieChart>
           ) : (

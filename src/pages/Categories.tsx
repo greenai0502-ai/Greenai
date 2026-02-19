@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Leaf, Flower2, CircleDot, ChevronRight } from 'lucide-react';
+import { Leaf, CircleDot, ChevronRight } from 'lucide-react';
 import { Navbar } from '@/components/Navbar';
 import { getSpeciesByCategory } from '@/data/mockData';
 
@@ -11,13 +11,7 @@ const categories = [
     color: 'from-primary to-accent',
     description: 'Trees, shrubs, herbs and more',
   },
-  {
-    id: 'flowers',
-    title: 'Flowers',
-    icon: Flower2,
-    color: 'from-nature-flower to-rose-400',
-    description: 'Beautiful blooming species',
-  },
+
   {
     id: 'mushrooms',
     title: 'Mushrooms',
@@ -46,7 +40,7 @@ export default function Categories() {
           {categories.map((cat, index) => {
             const count = getSpeciesByCategory(cat.id as any).length;
             const Icon = cat.icon;
-            
+
             return (
               <Link
                 key={cat.id}

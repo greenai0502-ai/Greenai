@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ChevronRight, Leaf, Flower2, CircleDot } from 'lucide-react';
+import { ChevronRight, Leaf, CircleDot } from 'lucide-react';
 import { SpeciesCard } from './SpeciesCard';
 import type { Species } from '@/data/mockData';
 
@@ -11,19 +11,17 @@ interface CategorySectionProps {
 
 const categoryIcons = {
   plants: Leaf,
-  flowers: Flower2,
   mushrooms: CircleDot,
 };
 
 const categoryColors = {
   plants: 'text-primary',
-  flowers: 'text-nature-flower',
   mushrooms: 'text-nature-mushroom',
 };
 
 export function CategorySection({ title, category, species }: CategorySectionProps) {
   const Icon = categoryIcons[category];
-  
+
   return (
     <section className="py-8">
       <div className="flex items-center justify-between mb-6">
@@ -43,8 +41,8 @@ export function CategorySection({ title, category, species }: CategorySectionPro
       </div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {species.slice(0, 4).map((item, index) => (
-          <div 
-            key={item.id} 
+          <div
+            key={item.id}
             className="animate-fade-in"
             style={{ animationDelay: `${index * 100}ms` }}
           >

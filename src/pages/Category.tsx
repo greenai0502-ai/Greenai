@@ -1,5 +1,5 @@
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Leaf, Flower2, CircleDot } from 'lucide-react';
+import { ArrowLeft, Leaf, CircleDot } from 'lucide-react';
 import { Navbar } from '@/components/Navbar';
 import { SpeciesCard } from '@/components/SpeciesCard';
 import { getSpeciesByCategory, Species } from '@/data/mockData';
@@ -10,11 +10,6 @@ const categoryMeta: Record<Species['category'], { title: string; icon: typeof Le
     icon: Leaf,
     description: 'Explore various plant species identified on campus',
   },
-  flowers: {
-    title: 'Flowers',
-    icon: Flower2,
-    description: 'Discover beautiful flowering plants in our collection',
-  },
   mushrooms: {
     title: 'Mushrooms',
     icon: CircleDot,
@@ -24,7 +19,7 @@ const categoryMeta: Record<Species['category'], { title: string; icon: typeof Le
 
 export default function Category() {
   const { category } = useParams<{ category: Species['category'] }>();
-  
+
   if (!category || !categoryMeta[category]) {
     return <div>Category not found</div>;
   }
@@ -46,7 +41,7 @@ export default function Category() {
             <ArrowLeft className="w-4 h-4" />
             Back to Home
           </Link>
-          
+
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 rounded-2xl nature-gradient flex items-center justify-center">
               <Icon className="w-7 h-7 text-primary-foreground" />
@@ -61,7 +56,7 @@ export default function Category() {
         {/* Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
           {species.map((item, index) => (
-            <div 
+            <div
               key={item.id}
               className="animate-fade-in"
               style={{ animationDelay: `${index * 50}ms` }}
